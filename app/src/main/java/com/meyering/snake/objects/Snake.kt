@@ -5,18 +5,24 @@ import android.graphics.Canvas
 import android.graphics.Point
 import android.graphics.Rect
 import androidx.core.graphics.plus
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.meyering.snake.R
 import java.util.*
 
 class Snake(context: Context, radius: Int) {
     companion object {
-        const val START_LENGTH = 3
+        const val START_LENGTH = 12
     }
 
+    var justAte = false
     val snakeBodyPart = context.getDrawable(R.drawable.snake_body_part).apply {
         this!!.bounds = Rect(-radius,-radius, radius, radius)
-
     }
+    val smallRadius = radius * 80 / 100
+    val snakeFace = VectorDrawableCompat.create(context.getResources(), R.drawable.snake_face, null).apply {
+        this!!.bounds = Rect(-smallRadius ,-smallRadius, smallRadius, smallRadius)
+    }
+
     val body: Queue<Point> = LinkedList()
     lateinit var lastHead: Point
     val directions = arrayOf(
@@ -38,7 +44,7 @@ class Snake(context: Context, radius: Int) {
     }
 
     fun updateDirection(d: Direction): Boolean {
-        if (d != badDirection) {
+        if (d != badDirection && d != Direction.NONE) {
             direction = d
             return true
         }
@@ -53,13 +59,21 @@ class Snake(context: Context, radius: Int) {
                 canvas.translate(-it.x.toFloat(), -it.y.toFloat())
             }
         }
+        canvas.translate(lastHead.x.toFloat(), lastHead.y.toFloat())
+        snakeFace!!.draw(canvas)
+        canvas.translate(-lastHead.x.toFloat(), -lastHead.y.toFloat())
     }
 
-    fun move(): Point {
+    fun move(): Point? {
         badDirection = Direction.complement(direction)
-        if (!body.isEmpty()) // && !ate
+        if (!body.isEmpty() && !justAte) {
             body.remove()
+        } else if (justAte) {
+            justAte = false
+        }
         lastHead += step()
+        if (body.contains(lastHead))
+            return null
         body.add(lastHead)
         return lastHead
     }
