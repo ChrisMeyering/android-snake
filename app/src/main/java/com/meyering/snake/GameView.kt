@@ -16,22 +16,28 @@ import com.meyering.snake.objects.Direction
 import com.meyering.snake.objects.Food
 import com.meyering.snake.objects.OnSwipeListener
 import com.meyering.snake.objects.Snake
+import kotlin.math.max
 import kotlin.math.min
 
 class GameView(context: Context, attrs: AttributeSet?) : View(context, attrs), OnSwipeListener {
     companion object {
-        const val SMALLEST_DIMENSION = 12 // 20 snake body parts will fit in width/height
-        const val FOOD_GENERATION_FREQUENCY = 20
+        const val SMALLEST_DIMENSION = 16
+        const val FOOD_GENERATION_FREQUENCY = 30
+        const val MAX_MOVE_FREQUENCY = 100L
+        const val START_MOVE_FREQUENCY = 400L
+        const val ACCELERATE_FREQUENCY = 1000L
+        const val ACCELERATION_RATE = 1
     }
 
+    var moveFrequency = START_MOVE_FREQUENCY
     private var isPaused = false
     lateinit var snake: Snake
     lateinit var food: Food
-    private val gestureDetector: GestureDetector = GestureDetector(this)
+    private val gestureDetector: GestureDetector = GestureDetector(context, this)
 
     @SuppressLint("NewApi")
     private val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = context.getColor(android.R.color.holo_red_dark)
+        color = context.getColor(android.R.color.black)
         style = Paint.Style.FILL
     }
 
@@ -42,22 +48,21 @@ class GameView(context: Context, attrs: AttributeSet?) : View(context, attrs), O
     var borderHorizontal = 0
     var borderVertical = 0
     var mhandler: Handler = Handler()
-    lateinit var runnable_init: Runnable
+    lateinit var runnable_init_game: Runnable
     lateinit var runnable_play_game: Runnable
+    lateinit var runnable_accelerator: Runnable
     init {
-        runnable_init = Runnable {
-            Log.i("Runnable Init", "Initialization in progress")
+        runnable_init_game = Runnable {
             if (width != null && height != null) {
                 init_game()
                 runnable_play_game.run()
+                mhandler.postDelayed(runnable_accelerator, ACCELERATE_FREQUENCY)
             } else {
-                mhandler.postDelayed(runnable_init, 400)
+                mhandler.postDelayed(runnable_init_game, moveFrequency)
             }
         }
-        runnable_init.run()
 
         runnable_play_game = Runnable {
-            Log.i("Runnable Play Game", "Playing game")
             moveSnake()
         }
 //        runnable = Runnable {
@@ -72,6 +77,19 @@ class GameView(context: Context, attrs: AttributeSet?) : View(context, attrs), O
 //            mhandler.postDelayed(runnable, 300)
 //        }
 //        runnable.run()
+        runnable_accelerator = Runnable {
+            accelerate()
+        }
+
+        runnable_init_game.run()
+
+    }
+
+    fun accelerate() {
+        moveFrequency = max(moveFrequency - ACCELERATION_RATE, MAX_MOVE_FREQUENCY)
+        if (moveFrequency > MAX_MOVE_FREQUENCY) {
+            mhandler.postDelayed(runnable_accelerator, ACCELERATE_FREQUENCY)
+        }
     }
 
     fun getBoardDimensions(): Point {
@@ -81,6 +99,7 @@ class GameView(context: Context, attrs: AttributeSet?) : View(context, attrs), O
     }
 
     fun init_game() {
+        moveFrequency = START_MOVE_FREQUENCY
         radius = min(width!!, height!!) / (2 * SMALLEST_DIMENSION)
         snake = Snake(context, radius!!)
         snake.init(Point(width!!/2, height!!/2))
@@ -100,7 +119,7 @@ class GameView(context: Context, attrs: AttributeSet?) : View(context, attrs), O
         mhandler.removeCallbacksAndMessages(runnable_play_game)
         Log.i("Ran into a wall", "GAME OVER")
         Toast.makeText(context, "GAME OVER: $msg", Toast.LENGTH_SHORT).show()
-        mhandler.postDelayed(runnable_init, 2000)
+        mhandler.postDelayed(runnable_init_game, 2000)
     }
 
     fun generateFood() {
@@ -114,25 +133,24 @@ class GameView(context: Context, attrs: AttributeSet?) : View(context, attrs), O
 
     fun moveSnake() {
         val headPosition = snake.move()
-        if (headPosition == null) {
-            gameOver("You ate yourself.")
-        } else if (isOutOfBounds(headPosition)) {
-            gameOver("You ran into a wall.")
-        } else {
-            if (food.food.contains(headPosition)) {
-                food.consumeFood(headPosition)
-                snake.justAte = true
-                if (food.food.isEmpty()) {
-                    generateFood()
+        when {
+            headPosition == null -> gameOver("You ate yourself.")
+            isOutOfBounds(headPosition) -> gameOver("You ran into a wall.")
+            else -> {
+                if (food.food.contains(headPosition)) {
+                    food.consumeFood(headPosition)
+                    snake.justAte = true
+                    if (food.food.isEmpty()) {
+                        generateFood()
+                    }
                 }
+                if (lastFoodAge > FOOD_GENERATION_FREQUENCY) {
+                    generateFood()
+                } else {
+                    lastFoodAge++
+                }
+                mhandler.postDelayed(runnable_play_game, moveFrequency)
             }
-//            if food.contains(headPosition)
-            if (lastFoodAge > FOOD_GENERATION_FREQUENCY) {
-                generateFood()
-            } else {
-                lastFoodAge++
-            }
-            mhandler.postDelayed(runnable_play_game, 400)
         }
         invalidate()
 
@@ -172,7 +190,6 @@ class GameView(context: Context, attrs: AttributeSet?) : View(context, attrs), O
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-
         width = measuredWidth
         height = measuredHeight
     }
@@ -198,6 +215,7 @@ class GameView(context: Context, attrs: AttributeSet?) : View(context, attrs), O
         if (isPaused) {
             isPaused = false
             mhandler.postDelayed(runnable_play_game, 1200)
+            mhandler.postDelayed(runnable_accelerator, ACCELERATE_FREQUENCY)
         }
     }
 

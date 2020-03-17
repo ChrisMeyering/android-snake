@@ -11,7 +11,7 @@ import java.util.*
 
 class Snake(context: Context, radius: Int) {
     companion object {
-        const val START_LENGTH = 12
+        const val START_LENGTH = 3
     }
 
     var justAte = false
@@ -52,15 +52,27 @@ class Snake(context: Context, radius: Int) {
     }
 
     fun draw(canvas: Canvas) {
-        canvas.apply {
-            body.forEach {
-                canvas.translate(it.x.toFloat(), it.y.toFloat())
-                snakeBodyPart!!.draw(canvas)
-                canvas.translate(-it.x.toFloat(), -it.y.toFloat())
-            }
+
+        body.forEach {
+            canvas.translate(it.x.toFloat(), it.y.toFloat())
+            snakeBodyPart!!.draw(canvas)
+            canvas.translate(-it.x.toFloat(), -it.y.toFloat())
         }
+        drawFace(canvas)
+    }
+
+    private fun drawFace(canvas: Canvas) {
         canvas.translate(lastHead.x.toFloat(), lastHead.y.toFloat())
+        val rotationAngle: Float
+        when(direction) {
+            Direction.UP -> rotationAngle = 180f
+            Direction.LEFT -> rotationAngle = 90f
+            Direction.RIGHT -> rotationAngle = -90f
+            else -> rotationAngle = 0f
+        }
+        canvas.rotate(rotationAngle)
         snakeFace!!.draw(canvas)
+        canvas.rotate(-rotationAngle)
         canvas.translate(-lastHead.x.toFloat(), -lastHead.y.toFloat())
     }
 

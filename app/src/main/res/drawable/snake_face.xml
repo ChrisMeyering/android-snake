@@ -4,19 +4,61 @@
     android:height="24dp"
     android:viewportWidth="24.0"
     android:viewportHeight="24.0">
-    <group>
-        <path
-            android:pathData="M2,2 L 2,11 L 11,11 L 11,2Z"
-            android:strokeWidth="1"
-            android:strokeColor="#FF000000" />
-
-        <path
-            android:pathData="M13,2 L 13,11 L 22,11 L 22,2Z"
-            android:strokeWidth="1"
-            android:strokeColor="#FF000000" />
-    </group>
+    <path
+        android:pathData="M2,2 L 2,11 L 11,11 L 11,2Z"
+        android:strokeWidth="1"
+        android:strokeColor="@android:color/black"
+        android:fillAlpha=".3"
+        android:fillColor="@android:color/white"/>
 
     <path
-        android:fillColor="#FF000000"
+        android:pathData="M13,2 L 13,11 L 22,11 L 22,2Z"
+        android:strokeWidth="1"
+        android:strokeColor="@android:color/black"
+        android:fillAlpha=".3"
+        android:fillColor="@android:color/white"/>
+
+    <path
+        android:fillColor="@android:color/black"
         android:pathData="M2,13 L22,13 C22,22 12,22 12,22 C12,22 1,22 2,13Z" />
 </vector>
+
+    <!---->
+    <!--CIRCLE-->
+    <!---->
+    <!--<vector xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--    android:width="32dp"-->
+    <!--    android:height="32dp"-->
+    <!--    android:viewportWidth="32.0"-->
+    <!--    android:viewportHeight="32.0">-->
+    <!--    <path-->
+    <!--        android:strokeWidth="1"-->
+    <!--        android:strokeColor="#FF000000"-->
+    <!--        android:pathData="M16,1 C36,1 36,31, 16,31 C-4,31 -4,1 16,1" />-->
+    <!--</vector>-->
+
+
+    <!--<vector xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--    android:width="34dp"-->
+    <!--    android:height="34dp"-->
+    <!--    android:viewportWidth="34.0"-->
+    <!--    android:viewportHeight="34.0">-->
+    <!--    <group>-->
+    <!--        <path-->
+    <!--            android:pathData="M1,16 C1,33 16,33 16,33 C33,33 33,16 33,16 C33,1 16,1 16,1 C1,1 1,16 1,16"-->
+    <!--            android:strokeWidth="1"-->
+    <!--            android:strokeColor="#FF000000" />-->
+    <!--        &lt;!&ndash;            android:pathData="M4,4 L 4,14 L 14,14 L 14,4 Z"&ndash;&gt;-->
+
+    <!--        <path-->
+    <!--            android:pathData="M18,4 L 18,14 L 28,14 L 28,4 Z"-->
+    <!--            android:strokeWidth="1"-->
+    <!--            android:strokeColor="#FF000000" />-->
+    <!--    </group>-->
+
+    <!--    <path-->
+    <!--        android:fillColor="#FF000000"-->
+    <!--        android:pathData="M 4,18 L 30,18 C30,30 17,30 17,30 C4,30 4,18 4,18Z" />-->
+    <!--</vector>-->
+
+
